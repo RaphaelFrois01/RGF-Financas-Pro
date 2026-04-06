@@ -253,7 +253,7 @@ function renderCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: { legend: { labels: { color: '#f8fafc' } } },
             scales: {
                 y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
@@ -281,7 +281,7 @@ function renderCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { position: 'bottom', labels: { color: '#f8fafc', padding: 20 } }
             },
