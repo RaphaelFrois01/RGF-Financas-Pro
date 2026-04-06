@@ -51,6 +51,50 @@ document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
     btn.innerText = 'Continuar';
 });
 
+// Esqueci minha senha (Solicitação)
+document.getElementById('forgot-password-link')?.addEventListener('click', async () => {
+    const email = document.getElementById('auth-email').value;
+    const msg = document.getElementById('auth-msg');
+    
+    if (!email) {
+        msg.innerText = "Por favor, digite seu e-mail acima primeiro.";
+        return;
+    }
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href, // Volta para o site atual
+    });
+
+    if (error) {
+        msg.innerText = "Erro: " + error.message;
+    } else {
+        msg.style.color = "var(--success)";
+        msg.innerText = "E-mail de recuperação enviado! Verifique sua caixa de entrada.";
+    }
+});
+
+// Salvar Nova Senha (Após clicar no link do e-mail)
+document.getElementById('recovery-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('recovery-btn');
+    const msg = document.getElementById('recovery-msg');
+    const newPassword = document.getElementById('new-password').value;
+
+    btn.disabled = true;
+    btn.innerText = "Salvando...";
+
+    const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+
+    if (error) {
+        msg.innerText = "Erro ao salvar senha: " + error.message;
+        btn.disabled = false;
+        btn.innerText = "Salvar Nova Senha";
+    } else {
+        alert("Senha atualizada com sucesso! Você já pode entrar.");
+        window.location.reload(); // Recarrega para limpar o estado de recuperação
+    }
+});
+
 // Logout
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
     await supabaseClient.auth.signOut();
@@ -60,10 +104,20 @@ document.getElementById('btn-logout')?.addEventListener('click', async () => {
 supabaseClient.auth.onAuthStateChange((event, session) => {
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
+    const recoveryContainer = document.getElementById('recovery-container');
+
+    // Se o evento for de recuperação de senha
+    if (event === 'PASSWORD_RECOVERY') {
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'none';
+        recoveryContainer.style.display = 'flex';
+        return;
+    }
 
     if (session) {
         currentUser = session.user;
         authContainer.style.display = 'none';
+        recoveryContainer.style.display = 'none';
         appContainer.style.display = 'grid'; // Volta para as classes do grid original
         appContainer.classList.add('container');
         setDefaultDates();
@@ -73,6 +127,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
         transactions = [];
         authContainer.style.display = 'flex';
         appContainer.style.display = 'none';
+        recoveryContainer.style.display = 'none';
     }
 });
 

@@ -38,7 +38,25 @@
                 </div>
                 <button type="submit" class="btn-primary" id="auth-btn">Continuar</button>
             </form>
+            <p id="forgot-password-link" style="color: var(--text-secondary); margin-top: 1rem; font-size: 0.85rem; text-align: center; text-decoration: underline; cursor: pointer;">Esqueci minha senha</p>
             <p id="auth-msg" style="color: var(--error); margin-top: 1rem; font-size: 0.9rem; text-align: center;"></p>
+        </div>
+    </div>
+
+    <!-- Recovery Wrapper (New Password) -->
+    <div class="auth-wrapper fade-in" id="recovery-container" style="display: none;">
+        <div class="glass auth-card">
+            <h1 class="auth-brand">RGF</h1>
+            <h2>Nova Senha 🔑</h2>
+            <p>Digite sua nova senha abaixo para recuperar o acesso.</p>
+            <form id="recovery-form">
+                <div class="input-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="new-password" required minlength="6" placeholder="******">
+                </div>
+                <button type="submit" class="btn-primary" id="recovery-btn">Salvar Nova Senha</button>
+            </form>
+            <p id="recovery-msg" style="color: var(--error); margin-top: 1rem; font-size: 0.9rem; text-align: center;"></p>
         </div>
     </div>
 
