@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RGF - Finanças Pro</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap"
         rel="stylesheet">
@@ -15,8 +19,10 @@
     <!-- Multi-usuário & PWA Meta -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RGF Finanças">
+    <meta name="description" content="RGF Finanças Pro - Controle sua vida financeira com elegância e precisão.">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="webapp.css">
 </head>
@@ -65,7 +71,7 @@
         <aside>
             <div class="glass kpi-card">
                 <span class="kpi-label">Saldo Geral</span>
-                <span id="total-balance" class="kpi-value">R$ 0,00</span>
+                <span id="total-balance" class="kpi-value pulse">R$ 0,00</span>
                 <span id="balance-delta" class="delta">0% vs mês anterior</span>
             </div>
 
