@@ -413,25 +413,25 @@ document.getElementById('csv-upload')?.addEventListener('change', async (e) => {
             }
         });
 
-        // Importar tudo de uma vez no banco
-        const { data, error } = await supabaseClient
-            .from('transactions')
-            .insert(batchToInsert)
-            .select();
+    // Importar tudo de uma vez no banco
+    const { data, error } = await supabaseClient
+        .from('transactions')
+        .insert(batchToInsert)
+        .select();
 
-        if (error) {
-            console.error("Erro no import bulk: ", error);
-            alert("Erro de importação na nuvem!");
-            return;
-        }
-        if (data) {
-            transactions = [...transactions, ...data];
-        }
+    if (error) {
+        console.error("Erro no import bulk: ", error);
+        alert("Erro de importação na nuvem!");
+        return;
+    }
+    if (data) {
+        transactions = [...transactions, ...data];
+    }
 
-        renderAll();
-        alert('Dados importados com sucesso! 🎉');
-    };
-    reader.readAsText(file);
+    renderAll();
+    alert('Dados importados com sucesso! 🎉');
+};
+reader.readAsText(file);
 });
 
 // Utils
