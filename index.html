@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGF - Finanças Pro</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Multi-usuário & PWA Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="webapp.css">
+</head>
+
+<body>
+    <div class="auth-wrapper fade-in" id="auth-container">
+        <div class="glass auth-card">
+            <h1 class="auth-brand">RGF</h1>
+            <h2>Bem-vindo! 👋</h2>
+            <p>Insira seu e-mail e senha. Se não tiver conta, criaremos uma para você na hora.</p>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" id="auth-email" required placeholder="seu@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" id="auth-password" required minlength="6" placeholder="******">
+                </div>
+                <button type="submit" class="btn-primary" id="auth-btn">Continuar</button>
+            </form>
+            <p id="auth-msg" style="color: var(--error); margin-top: 1rem; font-size: 0.9rem; text-align: center;"></p>
+        </div>
+    </div>
+
+    <div class="container fade-in" id="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <aside>
+            <div class="glass kpi-card">
+                <span class="kpi-label">Saldo Geral</span>
+                <span id="total-balance" class="kpi-value">R$ 0,00</span>
+                <span id="balance-delta" class="delta">0% vs mês anterior</span>
+            </div>
+
+            <div class="glass kpi-card">
+                <span class="kpi-label">Entradas (Mês)</span>
+                <span id="monthly-income" class="kpi-value" style="color: var(--success);">R$ 0,00</span>
+                <span id="income-delta" class="delta positive">+0%</span>
+            </div>
+
+            <div class="glass kpi-card">
+                <span class="kpi-label">Saídas (Mês)</span>
+                <span id="monthly-expense" class="kpi-value" style="color: var(--error);">R$ 0,00</span>
+                <span id="expense-delta" class="delta negative">-0%</span>
+            </div>
+
+            <div style="margin-top: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                <button id="export-csv" class="btn-primary" style="width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border);">📥 Exportar CSV</button>
+                <button id="btn-logout" class="btn-primary" style="width: 100%; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;">🚪 Sair da Conta</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <header>
+                <h1>RGF - Finanças</h1>
+                <div class="input-group">
+                    <input type="date" id="filter-date" style="background: var(--glass-bg); padding: 0.5rem 1rem;">
+                </div>
+            </header>
+
+            <!-- Tabs Section -->
+            <section class="glass tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" onclick="switchTab('income')">💵 Adicionar Receita</button>
+                    <button class="tab-btn" onclick="switchTab('expense')">📉 Adicionar Despesa</button>
+                    <button class="tab-btn" onclick="switchTab('import')">📤 Importar Dados</button>
+                </div>
+
+                <div id="income-form" class="tab-content">
+                    <form onsubmit="addTransaction(event, 'Entrada')">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Categorias</label>
+                                <select id="in-category" required>
+                                    <option value="Salário">💰 Salário</option>
+                                    <option value="Investimentos">🤑 Investimentos</option>
+                                    <option value="Presente">🎁 Presente</option>
+                                    <option value="Outros">✨ Outros</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" id="in-value" placeholder="0.00" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Descrição</label>
+                                <input type="text" id="in-desc" placeholder="Ex: Pagamento Mensal">
+                            </div>
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="in-date" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Salvar Receita ✨</button>
+                    </form>
+                </div>
+
+                <div id="expense-form" class="tab-content" style="display: none;">
+                    <form onsubmit="addTransaction(event, 'Saída')">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Categorias</label>
+                                <select id="ex-category" required>
+                                    <option value="Alimentação">🍔 Alimentação</option>
+                                    <option value="Moradia">🏠 Moradia</option>
+                                    <option value="Transporte">🚗 Transporte</option>
+                                    <option value="Lazer">🍿 Lazer</option>
+                                    <option value="Saúde">⚕️ Saúde</option>
+                                    <option value="Outros">💸 Outros</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" id="ex-value" placeholder="0.00" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Descrição</label>
+                                <input type="text" id="ex-desc" placeholder="Ex: Supermercado">
+                            </div>
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="ex-date" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary"
+                            style="background: linear-gradient(to right, var(--error), #ff6b6b);">Salvar Despesa
+                            📉</button>
+                    </form>
+                </div>
+
+                <div id="import-tab" class="tab-content" style="display: none;">
+                    <div
+                        style="padding: 2rem; border: 2px dashed var(--glass-border); border-radius: 1rem; text-align: center;">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Arraste seu arquivo CSV ou clique
+                            abaixo para importar.</p>
+                        <input type="file" id="csv-upload" accept=".csv" class="btn-primary"
+                            style="background: var(--glass-bg); cursor: pointer;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-grid">
+                <div class="glass chart-card">
+                    <h3 class="chart-title">Fluxo de Caixa (Mensal)</h3>
+                    <canvas id="cashflow-chart"></canvas>
+                </div>
+                <div class="glass chart-card">
+                    <h3 class="chart-title">Distribuição de Gastos</h3>
+                    <canvas id="expense-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Table Section -->
+            <section class="glass data-card">
+                <h3 class="chart-title">Histórico Recente</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-body">
+                        <!-- Rows will be injected here -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- Branding Footer (Global) -->
+    <footer class="branding-footer fade-in">
+        <div class="footer-content">
+            <p>© 2026 <strong>RGF - Finanças</strong>. Todos os direitos reservados.</p>
+            <p class="developed-by">Desenvolvido com tecnologia de ponta para sua liberdade financeira.</p>
+        </div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script src="app.js"></script>
+</body>
+
+</html>
