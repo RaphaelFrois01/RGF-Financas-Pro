@@ -18,37 +18,74 @@ let cashFlowChart = null;
 let expenseChart = null;
 let currentUser = null;
 
-// Botão Inteligente (Login ou Cria)
+// Auth State Management
+let isLoginPage = true;
+
+// Alternar entre Login e Cadastro
+document.getElementById('toggle-auth')?.addEventListener('click', () => {
+    isLoginPage = !isLoginPage;
+    const title = document.getElementById('auth-title');
+    const desc = document.getElementById('auth-desc');
+    const btn = document.getElementById('auth-btn');
+    const toggle = document.getElementById('toggle-auth');
+    const msg = document.getElementById('auth-msg');
+
+    msg.innerText = '';
+    if (isLoginPage) {
+        title.innerText = 'Bem-vindo! 👋';
+        desc.innerText = 'Insira seu e-mail e senha para acessar sua conta.';
+        btn.innerText = 'Entrar';
+        toggle.innerText = 'Não tem conta? Cadastre-se';
+    } else {
+        title.innerText = 'Criar Conta ✨';
+        desc.innerText = 'Comece sua jornada financeira agora mesmo.';
+        btn.innerText = 'Cadastrar';
+        toggle.innerText = 'Já tem conta? Entrar';
+    }
+});
+
+// Formulário de Autenticação
 document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('auth-btn');
     const msg = document.getElementById('auth-msg');
-    btn.disabled = true;
-    btn.innerText = 'Processando...';
-    msg.innerText = '';
-
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
 
-    // Primeiro tenta fazer Login
-    let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    btn.disabled = true;
+    const originalBtnText = btn.innerText;
+    btn.innerText = 'Processando...';
+    msg.innerText = '';
+    msg.style.color = "var(--error)";
 
-    if (error) {
-        // Se o erro for de credenciais/usuário não encontrado e a senha tem tamanho correto, tenta criar
-        if (error.message.includes('Invalid login credentials')) {
-            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
-            if (signUpError) {
-                msg.innerText = "Erro ao criar conta: " + signUpError.message;
-            } else {
-                msg.innerText = "Sua conta foi criada automaticamente! Bem-vindo(a).";
+    try {
+        if (isLoginPage) {
+            // Apenas tentativa de Login
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                if (error.message.includes("Invalid login credentials")) {
+                    throw new Error("E-mail ou senha incorretos. Verifique e tente novamente.");
+                }
+                throw error;
             }
         } else {
-            msg.innerText = error.message;
-        }
-    }
+            // Apenas tentativa de Cadastro
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) throw error;
 
-    btn.disabled = false;
-    btn.innerText = 'Continuar';
+            if (data?.user?.identities?.length === 0) {
+                throw new Error("Este e-mail já está cadastrado. Tente fazer login.");
+            }
+
+            msg.style.color = "var(--success)";
+            msg.innerText = "Conta criada! Verifique seu e-mail se necessário ou faça login.";
+        }
+    } catch (err) {
+        msg.innerText = err.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerText = originalBtnText;
+    }
 });
 
 // Esqueci minha senha (Solicitação)
@@ -413,25 +450,25 @@ document.getElementById('csv-upload')?.addEventListener('change', async (e) => {
             }
         });
 
-    // Importar tudo de uma vez no banco
-    const { data, error } = await supabaseClient
-        .from('transactions')
-        .insert(batchToInsert)
-        .select();
+        // Importar tudo de uma vez no banco
+        const { data, error } = await supabaseClient
+            .from('transactions')
+            .insert(batchToInsert)
+            .select();
 
-    if (error) {
-        console.error("Erro no import bulk: ", error);
-        alert("Erro de importação na nuvem!");
-        return;
-    }
-    if (data) {
-        transactions = [...transactions, ...data];
-    }
+        if (error) {
+            console.error("Erro no import bulk: ", error);
+            alert("Erro de importação na nuvem!");
+            return;
+        }
+        if (data) {
+            transactions = [...transactions, ...data];
+        }
 
-    renderAll();
-    alert('Dados importados com sucesso! 🎉');
-};
-reader.readAsText(file);
+        renderAll();
+        alert('Dados importados com sucesso! 🎉');
+    };
+    reader.readAsText(file);
 });
 
 // Utils

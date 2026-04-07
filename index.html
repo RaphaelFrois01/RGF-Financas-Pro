@@ -31,8 +31,8 @@
     <div class="auth-wrapper fade-in" id="auth-container">
         <div class="glass auth-card">
             <h1 class="auth-brand">RGF</h1>
-            <h2>Bem-vindo! 👋</h2>
-            <p>Insira seu e-mail e senha. Se não tiver conta, criaremos uma para você na hora.</p>
+            <h2 id="auth-title">Bem-vindo! 👋</h2>
+            <p id="auth-desc">Insira seu e-mail e senha para acessar sua conta.</p>
             <form id="auth-form">
                 <div class="input-group">
                     <label>E-mail</label>
@@ -42,9 +42,10 @@
                     <label>Senha</label>
                     <input type="password" id="auth-password" required minlength="6" placeholder="******">
                 </div>
-                <button type="submit" class="btn-primary" id="auth-btn">Continuar</button>
+                <button type="submit" class="btn-primary" id="auth-btn">Entrar</button>
             </form>
-            <p id="forgot-password-link" style="color: var(--text-secondary); margin-top: 1rem; font-size: 0.85rem; text-align: center; text-decoration: underline; cursor: pointer;">Esqueci minha senha</p>
+            <p id="toggle-auth" style="color: var(--primary); margin-top: 1rem; font-size: 0.85rem; text-align: center; cursor: pointer; text-decoration: underline;">Não tem conta? Cadastre-se</p>
+            <p id="forgot-password-link" style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.85rem; text-align: center; text-decoration: underline; cursor: pointer;">Esqueci minha senha</p>
             <p id="auth-msg" style="color: var(--error); margin-top: 1rem; font-size: 0.9rem; text-align: center;"></p>
         </div>
     </div>
